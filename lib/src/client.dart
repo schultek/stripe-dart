@@ -61,16 +61,23 @@ class Client {
   /// Makes a get request to the Stripe API
   Future<T> get<T>(
     final String path, {
+    Map<String, dynamic>? params,
     String? idempotencyKey,
   }) async {
     final response = await client.get(
-      _createUri(path),
+      _createUri(path, params: params),
       headers: _createHeaders(idempotencyKey: idempotencyKey),
     );
     return _processResponse(response);
   }
 
-  Uri _createUri(String path) => Uri.parse(baseUrl + path);
+  Uri _createUri(String path, {Map<String, dynamic>? params}) {
+    var url = baseUrl + path;
+    if (params != null && params.isNotEmpty) {
+      url += '?' + params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    }
+    return Uri.parse(url);
+  }
 
   Map<String, String> _createHeaders({String? idempotencyKey}) => {
         if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,

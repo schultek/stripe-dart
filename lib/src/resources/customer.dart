@@ -15,4 +15,10 @@ class CustomerResource {
   Future<Customer> retrieve(String customerId) async {
     return _client.get('customers/$customerId');
   }
+
+  Future<DataList<Customer>> list({String? email}) async {
+    return _client.get('customers', params: {
+      if (email != null) 'email': email,
+    });
+  }
 }
