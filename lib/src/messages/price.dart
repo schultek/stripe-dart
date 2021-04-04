@@ -1,14 +1,11 @@
 part of '../../messages.dart';
 
-enum _PriceObject { price }
-
+@jsonSerializable
 enum PriceType { one_time, recurring }
 
 /// https://stripe.com/docs/api/charges/object
-@JsonSerializable()
+@jsonSerializable
 class Price {
-  final _PriceObject object;
-
   /// Unique identifier for the object.
   final String id;
 
@@ -31,7 +28,6 @@ class Price {
   final int unitAmount;
 
   Price({
-    required this.object,
     required this.id,
     required this.active,
     required this.currency,
@@ -39,6 +35,4 @@ class Price {
     required this.type,
     required this.unitAmount,
   });
-  factory Price.fromJson(Map<String, dynamic> json) => _$PriceFromJson(json);
-  Map<String, dynamic> toJson() => _$PriceToJson(this);
 }

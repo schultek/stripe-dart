@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:stripe/src/exceptions.dart';
 
@@ -10,136 +12,118 @@ const _defaultVersion = '2020-08-27';
 
 /// The http client implementation that will make requests to the stripe API.
 ///
-/// Internally this uses a [Dio] http client.
+/// Internally this uses a http client.
 class Client {
   final String version;
   final String apiKey;
+  final String baseUrl;
 
-  /// Creates a [Dio] client that will make requests to [baseUrl].
+  /// Creates a client that will make requests to [baseUrl].
   factory Client({
     required String apiKey,
     String baseUrl = _defaultUrl,
     String version = _defaultVersion,
   }) =>
-      Client.withDio(Dio(), baseUrl: baseUrl, version: version, apiKey: apiKey);
+      Client.withClient(http.Client(), baseUrl: baseUrl, version: version, apiKey: apiKey);
 
   @visibleForTesting
-  Client.withDio(
-    this.dio, {
+  Client.withClient(
+    this.client, {
     required this.apiKey,
-    String baseUrl = _defaultUrl,
+    this.baseUrl = _defaultUrl,
     this.version = _defaultVersion,
-  }) {
-    dio.transformer = FormDataTransformer();
-    dio.options
-      ..baseUrl = baseUrl
-      ..responseType = ResponseType.json
-      ..contentType = 'application/x-www-form-urlencoded'
-      ..headers = {
-        'Authorization': 'Basic ${base64Encode(utf8.encode('$apiKey:'))}',
-        'Stripe-Version': version,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      };
-  }
+  });
 
-  /// The actual [Dio] instance that makes the request. You shouldn't need to
+  /// The actual [http.Client] instance that makes the request. You shouldn't need to
   /// access this.
   @visibleForTesting
-  final Dio dio;
+  final http.Client client;
 
   /// Makes a post request to the Stripe API
-  Future<Map<String, dynamic>> post(
+  Future<T> post<T>(
     final String path, {
-    final Map<String, dynamic>? data,
+    final Object? data,
     final String? idempotencyKey,
   }) async {
     try {
-      final response = await dio.post<Map<String, dynamic>>(path,
-          data: data,
-          options: _createRequestOptions(idempotencyKey: idempotencyKey));
-      return processResponse(response);
-    } on DioError catch (e) {
+      final response = await client.post(
+        _createUri(path),
+        body: fixMap(JsonMapper.toMap(data)),
+        headers: _createHeaders(idempotencyKey: idempotencyKey),
+      );
+      return _processResponse(response);
+    } on HttpException catch (e) {
       var message = e.message;
-      if (e.response?.data != null) {
-        message += '${e.response!.data}';
-      }
       throw InvalidRequestException(message);
     }
   }
 
   /// Makes a get request to the Stripe API
-  Future<Map<String, dynamic>> get(
+  Future<T> get<T>(
     final String path, {
     String? idempotencyKey,
   }) async {
-    final response = await dio.get<Map<String, dynamic>>(
-      path,
-      options: _createRequestOptions(idempotencyKey: idempotencyKey),
+    final response = await client.get(
+      _createUri(path),
+      headers: _createHeaders(idempotencyKey: idempotencyKey),
     );
-    return processResponse(response);
+    return _processResponse(response);
   }
 
-  Options? _createRequestOptions({String? idempotencyKey}) =>
-      idempotencyKey == null
-          ? null
-          : Options(headers: {'Idempotency-Key': idempotencyKey});
+  Uri _createUri(String path) => Uri.parse(baseUrl + path);
 
-  Map<String, dynamic> processResponse(
-      Response<Map<String, dynamic>> response) {
+  Map<String, String> _createHeaders({String? idempotencyKey}) => {
+        if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,
+        HttpHeaders.authorizationHeader: 'Basic ${base64Encode(utf8.encode('$apiKey:'))}',
+        'Stripe-Version': version,
+        HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded',
+      };
+
+  T _processResponse<T>(http.Response response) {
     final responseStatusCode = response.statusCode;
 
-    final data = response.data;
-
     if (responseStatusCode != 200) {
+      var data = JsonMapper.toMap(response.body);
+
       if (data == null || data['error'] == null) {
-        throw InvalidRequestException(
-            'The status code returned was $responseStatusCode but no error was provided.');
+        throw InvalidRequestException('The status code returned was $responseStatusCode but no error was provided.');
       }
       final error = data['error'] as Map;
       switch (error['type'].toString()) {
         case 'invalid_request_error':
           throw InvalidRequestException(error['message'].toString());
         default:
-          throw UnknownTypeException(
-              'The status code returned was $responseStatusCode but the error type is unknown.');
+          throw UnknownTypeException('The status code returned was $responseStatusCode but the error type is unknown.');
       }
     }
+
+    var data = JsonMapper.deserialize<T>(response.body);
     if (data == null) {
-      throw InvalidRequestException(
-          'The JSON returned was unparsable (${response.data}).');
+      throw InvalidRequestException('The JSON returned was unparsable (${response.body}).');
     }
     return data;
   }
 }
 
-/// This converter is usd by Dio to convert [List] objects to [Map] so they
+/// This converter is used to convert [List] objects to [Map] so they
 /// are encoded properly for Stripe.
 ///
 /// Stripe expects array to be submited like this: `some_field[0]=value` and not
 /// `some_field=[value]`.
-class FormDataTransformer extends DefaultTransformer {
-  void fixMap(Map object) {
-    if (object is Map) {
-      for (final key in object.keys) {
-        var value = object[key];
-        if (value is List) {
-          object[key] = Map.fromIterables(
-              List.generate(value.length, (index) => '$index'), value);
-        }
+Map? fixMap(Map? object) {
+  if (object is Map) {
+    for (final key in object.keys) {
+      var value = object[key];
+      if (value is List) {
+        object[key] = Map.fromIterables(List.generate(value.length, (index) => '$index'), value);
+      }
 
-        var newValue = object[key];
-        if (newValue is Map) {
-          fixMap(newValue);
-        }
+      var newValue = object[key];
+      if (newValue is Map) {
+        fixMap(newValue);
       }
     }
   }
 
-  @override
-  Future<String> transformRequest(RequestOptions options) async {
-    if (options.data is Map) {
-      fixMap(options.data);
-    }
-    return super.transformRequest(options);
-  }
+  return object;
 }

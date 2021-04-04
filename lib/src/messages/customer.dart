@@ -1,12 +1,8 @@
 part of '../../messages.dart';
 
-enum _CustomerObject { customer }
-
 /// https://stripe.com/docs/api/charges/object
-@JsonSerializable()
+@jsonSerializable
 class Customer {
-  final _CustomerObject object;
-
   /// Unique identifier for the object.
   final String id;
 
@@ -26,14 +22,10 @@ class Customer {
   final String? name;
 
   Customer({
-    required this.object,
     required this.id,
     this.description,
     this.email,
     this.metadata,
     this.name,
   });
-  factory Customer.fromJson(Map<String, dynamic> json) =>
-      _$CustomerFromJson(json);
-  Map<String, dynamic> toJson() => _$CustomerToJson(this);
 }

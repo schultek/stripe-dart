@@ -1,5 +1,6 @@
 part of '../../messages.dart';
 
+@jsonSerializable
 enum PaymentMethodType {
   alipay,
   card,
@@ -17,24 +18,17 @@ enum PaymentMethodType {
 }
 
 /// https://stripe.com/docs/api/checkout/sessions/object
-@JsonSerializable()
+@jsonSerializable
 class Session {
-  /// Doesn't work with enum because there is a dot in it.
-  final String object;
   final String id;
   final String? customer;
   final String? paymentIntent;
   final List<PaymentMethodType> paymentMethodTypes;
 
   Session({
-    required this.object,
     required this.id,
     required this.paymentMethodTypes,
     this.customer,
     this.paymentIntent,
   });
-
-  factory Session.fromJson(Map<String, dynamic> json) =>
-      _$SessionFromJson(json);
-  Map<String, dynamic> toJson() => _$SessionToJson(this);
 }

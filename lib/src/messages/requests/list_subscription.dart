@@ -1,7 +1,7 @@
 part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/sessions/create
-@JsonSerializable()
+@jsonSerializable
 class ListSubscriptionRequest {
   /// The ID of the customer whose subscriptions will be retrieved.
   final String? customer;
@@ -21,8 +21,4 @@ class ListSubscriptionRequest {
     this.price,
     this.status,
   });
-
-  factory ListSubscriptionRequest.fromJson(Map<String, dynamic> json) =>
-      _$ListSubscriptionRequestFromJson(json);
-  Map<String, dynamic> toJson() => _$ListSubscriptionRequestToJson(this);
 }

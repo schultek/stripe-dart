@@ -1,7 +1,7 @@
 part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/customers/create
-@JsonSerializable()
+@jsonSerializable
 class CreateCustomerRequest {
   /// An arbitrary string that you can attach to a customer object. It is
   /// displayed alongside the customer in the dashboard.
@@ -35,8 +35,4 @@ class CreateCustomerRequest {
     this.paymentMethod,
     this.phoneNumber,
   });
-
-  factory CreateCustomerRequest.fromJson(Map<String, dynamic> json) =>
-      _$CreateCustomerRequestFromJson(json);
-  Map<String, dynamic> toJson() => _$CreateCustomerRequestToJson(this);
 }

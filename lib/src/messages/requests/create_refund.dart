@@ -1,7 +1,7 @@
 part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/refunds/create
-@JsonSerializable()
+@jsonSerializable
 class CreateRefundRequest {
   /// The identifier of the charge to refund.
   final String? charge;
@@ -27,8 +27,4 @@ class CreateRefundRequest {
     this.paymentIntent,
     this.reason,
   });
-
-  factory CreateRefundRequest.fromJson(Map<String, dynamic> json) =>
-      _$CreateRefundRequestFromJson(json);
-  Map<String, dynamic> toJson() => _$CreateRefundRequestToJson(this);
 }

@@ -2,6 +2,7 @@ library stripe;
 
 import 'package:meta/meta.dart';
 
+import 'messages.dart';
 import 'src/client.dart';
 import 'src/resources/balance_transaction.dart';
 import 'src/resources/charge.dart';
@@ -9,6 +10,7 @@ import 'src/resources/customer.dart';
 import 'src/resources/payment_intent.dart';
 import 'src/resources/refund.dart';
 import 'src/resources/session.dart';
+import 'src/resources/setup_intent.dart';
 import 'src/resources/subscription.dart';
 
 export 'messages.dart';
@@ -49,7 +51,11 @@ class Stripe {
   /// https://stripe.com/docs/api/balance_transactions
   final BalanceTransactionResource balanceTransaction;
 
+  /// https://stripe.com/docs/api/setup_intents
+  final SetupIntentResource setupIntent;
+
   factory Stripe(String apiKey) {
+    initJsonMapper();
     final client = Client(apiKey: apiKey);
     return Stripe.withClient(client);
   }
@@ -62,5 +68,6 @@ class Stripe {
         paymentIntent = PaymentIntentResource(client),
         subscription = SubscriptionResource(client),
         charge = ChargeResource(client),
-        balanceTransaction = BalanceTransactionResource(client);
+        balanceTransaction = BalanceTransactionResource(client),
+        setupIntent = SetupIntentResource(client);
 }

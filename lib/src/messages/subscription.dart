@@ -1,7 +1,6 @@
 part of '../../messages.dart';
 
-enum _SubscriptionObject { subscription }
-
+@jsonSerializable
 enum SubscriptionStatus {
   incomplete,
   incomplete_expired,
@@ -16,10 +15,8 @@ enum SubscriptionStatus {
 }
 
 /// https://stripe.com/docs/api/charges/object
-@JsonSerializable()
+@jsonSerializable
 class Subscription {
-  final _SubscriptionObject object;
-
   /// Unique identifier for the object.
   final String id;
 
@@ -61,14 +58,10 @@ class Subscription {
   final DataList<SubscriptionItem> items;
 
   Subscription({
-    required this.object,
     required this.id,
     required this.created,
     required this.customer,
     required this.status,
     required this.items,
   });
-  factory Subscription.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionFromJson(json);
-  Map<String, dynamic> toJson() => _$SubscriptionToJson(this);
 }

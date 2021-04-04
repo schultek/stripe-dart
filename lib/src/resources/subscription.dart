@@ -9,13 +9,10 @@ class SubscriptionResource {
   SubscriptionResource(this._client);
 
   Future<Subscription> get(String id) async {
-    final response = await _client.get('subscription/$id');
-    return Subscription.fromJson(response);
+    return _client.get('subscription/$id');
   }
 
   Future<DataList<Subscription>> list(ListSubscriptionRequest request) async {
-    final map = await _client.post('subscriptions', data: request.toJson());
-    return DataList<Subscription>.fromJson(
-        map, (value) => Subscription.fromJson(value as Map<String, dynamic>));
+    return _client.post('subscriptions', data: request);
   }
 }

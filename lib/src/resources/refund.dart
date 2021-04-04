@@ -9,7 +9,6 @@ class RefundResource {
   RefundResource(this._client);
 
   Future<Refund> create(CreateRefundRequest request) async {
-    final map = await _client.post('refunds', data: request.toJson());
-    return Refund.fromJson(map);
+    return _client.post('refunds', data: request);
   }
 }

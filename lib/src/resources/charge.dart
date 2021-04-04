@@ -9,7 +9,6 @@ class ChargeResource {
   ChargeResource(this._client);
 
   Future<Charge> retrieve(String chargeId) async {
-    final map = await _client.get('charges/$chargeId');
-    return Charge.fromJson(map);
+    return _client.get('charges/$chargeId');
   }
 }
