@@ -2,6 +2,7 @@ part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/customers/create
 @jsonSerializable
+@Json(caseStyle: CaseStyle.Snake)
 class CreateCustomerRequest {
   /// An arbitrary string that you can attach to a customer object. It is
   /// displayed alongside the customer in the dashboard.

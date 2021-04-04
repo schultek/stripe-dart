@@ -2,6 +2,7 @@ part of '../../messages.dart';
 
 /// https://stripe.com/docs/api/charges/object
 @jsonSerializable
+@Json(caseStyle: CaseStyle.Snake)
 class Charge {
   final String id;
   final String balanceTransaction;

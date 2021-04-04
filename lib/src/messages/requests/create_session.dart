@@ -14,6 +14,7 @@ enum SessionMode {
 
 /// https://stripe.com/docs/api/checkout/sessions/create
 @jsonSerializable
+@Json(caseStyle: CaseStyle.Snake)
 class CreateSessionRequest {
   /// The URL to which Stripe should send customers when payment or setup is
   /// complete. If you’d like access to the Checkout Session for the successful

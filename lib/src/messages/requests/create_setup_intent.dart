@@ -1,6 +1,6 @@
 part of messages;
 
-/// https://stripe.com/docs/api/checkout/sessions/create
+/// https://stripe.com/docs/api/setup_intents/create
 @jsonSerializable
 class CreateSetupIntentRequest {
   /// Set to true to attempt to confirm this SetupIntent immediately.
