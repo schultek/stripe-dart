@@ -1,8 +1,6 @@
 library messages;
 
-import 'package:dart_json_mapper/dart_json_mapper.dart';
-
-import 'messages.mapper.g.dart' show initializeJsonMapper;
+export 'messages.mapper.g.dart';
 
 part 'src/messages/balance_transaction.dart';
 part 'src/messages/charge.dart';
@@ -20,21 +18,3 @@ part 'src/messages/session.dart';
 part 'src/messages/setup_intent.dart';
 part 'src/messages/subscription.dart';
 part 'src/messages/subscription_item.dart';
-
-/// used for json_mapper code generation
-void main() {
-  initJsonMapper();
-}
-
-bool isJsonInitialized = false;
-
-void initJsonMapper() {
-  if (isJsonInitialized) return;
-  initializeJsonMapper(adapters: [
-    JsonMapperAdapter(valueDecorators: {
-      typeOf<int>(): (value) => value?.round(),
-      typeOf<int?>(): (value) => value?.round(),
-    })
-  ]);
-  isJsonInitialized = true;
-}

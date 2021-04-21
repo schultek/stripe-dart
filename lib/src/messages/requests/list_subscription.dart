@@ -1,7 +1,6 @@
 part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/sessions/create
-@jsonSerializable
 class ListSubscriptionRequest {
   /// The ID of the customer whose subscriptions will be retrieved.
   final String? customer;

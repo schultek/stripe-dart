@@ -1,7 +1,6 @@
 part of '../../messages.dart';
 
 /// https://stripe.com/docs/api/balance_transactions/object
-@jsonSerializable
 class BalanceTransaction {
   final String id;
   final int amount;

@@ -1,35 +1,25 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' show Response;
+import 'package:http/testing.dart';
 import 'package:stripe/src/client.dart';
 import 'package:stripe/src/resources/payment_intent.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late Client client;
-  late PaymentIntentResource paymentIntentResource;
-  setUp(() {
-    // We set the baseUrl to something unreachable, because we define
-    // interceptors in the tests.
-    client = Client(apiKey: 'sk_foobar', baseUrl: 'http://void/');
-    paymentIntentResource = PaymentIntentResource(client);
-  });
   group('PaymentIntentResource', () {
     test('properly decodes all values', () async {
       const id = 'pi_1EUqMaAA7oWz99nSFM4ANx6C';
-      client.dio.interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          expect(options.uri, Uri.parse('http://void/payment_intents/$id'));
-          handler.resolve(
-            Response(
-              requestOptions: options,
-              data: jsonDecode(createSessionResponse),
-              statusCode: HttpStatus.ok,
-            ),
-          );
-        },
-      ));
+
+      var client = Client.withClient(
+        MockClient((request) async {
+          expect(request.url, Uri.parse('https://api.stripe.com/v1/payment_intents/$id'));
+          return Response(createSessionResponse, HttpStatus.ok);
+        }),
+        apiKey: 'sk_foobar',
+      );
+
+      var paymentIntentResource = PaymentIntentResource(client);
 
       final response = await paymentIntentResource.retrieve(id);
 

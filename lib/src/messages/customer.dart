@@ -1,7 +1,6 @@
 part of '../../messages.dart';
 
 /// https://stripe.com/docs/api/charges/object
-@jsonSerializable
 class Customer {
   /// Unique identifier for the object.
   final String id;

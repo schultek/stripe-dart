@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_json_mapper/dart_json_mapper.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:stripe/src/exceptions.dart';
+
+import '../messages.dart';
 
 const _defaultUrl = 'https://api.stripe.com/v1/';
 const _defaultVersion = '2020-08-27';
@@ -48,10 +49,10 @@ class Client {
     try {
       final response = await client.post(
         _createUri(path),
-        body: fixMap(JsonMapper.toMap(data)),
+        body: fixMap(Mapper.toMap(data)),
         headers: _createHeaders(idempotencyKey: idempotencyKey),
       );
-      return _processResponse(response);
+      return _processResponse<T>(response);
     } on HttpException catch (e) {
       var message = e.message;
       throw InvalidRequestException(message);
@@ -68,7 +69,7 @@ class Client {
       _createUri(path, params: params),
       headers: _createHeaders(idempotencyKey: idempotencyKey),
     );
-    return _processResponse(response);
+    return _processResponse<T>(response);
   }
 
   Uri _createUri(String path, {Map<String, dynamic>? params}) {
@@ -90,7 +91,7 @@ class Client {
     final responseStatusCode = response.statusCode;
 
     if (responseStatusCode != 200) {
-      var data = JsonMapper.toMap(response.body);
+      var data = jsonDecode(response.body);
 
       if (data == null || data['error'] == null) {
         throw InvalidRequestException('The status code returned was $responseStatusCode but no error was provided.');
@@ -104,7 +105,7 @@ class Client {
       }
     }
 
-    var data = JsonMapper.deserialize<T>(response.body);
+    var data = Mapper.fromJson<T>(response.body);
     if (data == null) {
       throw InvalidRequestException('The JSON returned was unparsable (${response.body}).');
     }
@@ -117,20 +118,28 @@ class Client {
 ///
 /// Stripe expects array to be submited like this: `some_field[0]=value` and not
 /// `some_field=[value]`.
-Map? fixMap(Map? object) {
-  if (object is Map) {
-    for (final key in object.keys) {
-      var value = object[key];
-      if (value is List) {
-        object[key] = Map.fromIterables(List.generate(value.length, (index) => '$index'), value);
-      }
+Map<String, String>? fixMap(Map? object) {
+  if (object == null) {
+    return null;
+  }
+  var map = <String, String>{};
+  for (final key in object.keys) {
+    var value = object[key];
 
-      var newValue = object[key];
-      if (newValue is Map) {
-        fixMap(newValue);
+    if (value is List) {
+      value = Map.fromIterables(List.generate(value.length, (index) => '$index'), value);
+    }
+
+    if (value is Map<String, dynamic>) {
+      value = fixMap(value);
+      for (String subkey in value.keys) {
+        var i = subkey.indexOf('[');
+        var key2 = i >= 0 ? '[${subkey.substring(0, i)}]${subkey.substring(i)}' : '[$subkey]';
+        map['$key$key2'] = value[subkey].toString();
       }
+    } else {
+      map[key] = value.toString();
     }
   }
-
-  return object;
+  return map;
 }

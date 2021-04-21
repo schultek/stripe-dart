@@ -1,6 +1,5 @@
 part of '../../../messages.dart';
 
-@jsonSerializable
 enum SessionMode {
   /// Accept one-time payments for cards, iDEAL, and more.
   payment,
@@ -13,8 +12,6 @@ enum SessionMode {
 }
 
 /// https://stripe.com/docs/api/checkout/sessions/create
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class CreateSessionRequest {
   /// The URL to which Stripe should send customers when payment or setup is
   /// complete. If you’d like access to the Checkout Session for the successful
@@ -75,7 +72,6 @@ class CreateSessionRequest {
   });
 }
 
-@jsonSerializable
 class LineItem {
   final List<String>? images;
   final int? quantity;

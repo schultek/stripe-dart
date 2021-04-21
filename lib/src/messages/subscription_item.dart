@@ -1,7 +1,6 @@
 part of '../../messages.dart';
 
 /// https://stripe.com/docs/api/charges/object
-@jsonSerializable
 class SubscriptionItem {
   /// Unique identifier for the object.
   final String id;

@@ -1,9 +1,9 @@
 targets:
   $default:
     builders:
-      dart_json_mapper:
+      dart_mappable:
         generate_for:
           - lib/messages.dart
-      reflectable:
-        generate_for:
-          - no/files
+        options:
+          caseStyle: snakeCase
+          ignoreNull: true

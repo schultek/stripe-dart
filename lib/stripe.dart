@@ -2,7 +2,6 @@ library stripe;
 
 import 'package:meta/meta.dart';
 
-import 'messages.dart';
 import 'src/client.dart';
 import 'src/resources/balance_transaction.dart';
 import 'src/resources/charge.dart';
@@ -55,7 +54,6 @@ class Stripe {
   final SetupIntentResource setupIntent;
 
   factory Stripe(String apiKey) {
-    initJsonMapper();
     final client = Client(apiKey: apiKey);
     return Stripe.withClient(client);
   }

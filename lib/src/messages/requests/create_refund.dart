@@ -1,8 +1,6 @@
 part of '../../../messages.dart';
 
 /// https://stripe.com/docs/api/checkout/refunds/create
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class CreateRefundRequest {
   /// The identifier of the charge to refund.
   final String? charge;

@@ -1,30 +1,19 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' show Response;
+import 'package:http/testing.dart';
 import 'package:stripe/messages.dart';
 import 'package:stripe/src/client.dart';
 import 'package:stripe/src/resources/session.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late Client client;
-  late SessionResource sessionResource;
-  setUp(() {
-    // We set the baseUrl to something unreachable, because we define
-    // interceptors in the tests.
-    client = Client(apiKey: 'sk_foobar', baseUrl: 'http://void/');
-    sessionResource = SessionResource(client);
-  });
   group('SessionResource', () {
     test('properly decodes all values', () async {
       final request = CreateSessionRequest(
           successUrl: 'https://success',
           cancelUrl: 'https://cancel',
-          paymentMethodTypes: [
-            PaymentMethodType.card,
-            PaymentMethodType.afterpay_clearpay
-          ],
+          paymentMethodTypes: [PaymentMethodType.card, PaymentMethodType.afterpay_clearpay],
           customer: 'cus_JBeWftkPvAhbsN',
           lineItems: [
             LineItem(
@@ -34,26 +23,21 @@ void main() {
             )
           ]);
 
-      expect(request.toJson()['payment_method_types'],
-          ['card', 'afterpay_clearpay']);
+      expect(request.toMap()['payment_method_types'], ['card', 'afterpay_clearpay']);
 
-      client.dio.interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          expect(options.data, request.toJson());
-          handler.resolve(
-            Response(
-              requestOptions: options,
-              data: jsonDecode(createSessionResponse),
-              statusCode: HttpStatus.ok,
-            ),
-          );
-        },
-      ));
+      var client = Client.withClient(
+        MockClient((request) async {
+          expect(request.url, Uri.parse('https://api.stripe.com/v1/checkout/sessions'));
+          return Response(createSessionResponse, HttpStatus.ok);
+        }),
+        apiKey: 'sk_foobar',
+      );
+
+      var sessionResource = SessionResource(client);
 
       final response = await sessionResource.create(request);
 
-      expect(response.id,
-          'cs_test_TkmJFX7eEMan6f0W3q5n21sRgRraVzKf0BPTTmb0kn9yPBT9lr0ZJBVy');
+      expect(response.id, 'cs_test_TkmJFX7eEMan6f0W3q5n21sRgRraVzKf0BPTTmb0kn9yPBT9lr0ZJBVy');
       expect(response.paymentMethodTypes, [PaymentMethodType.card]);
     });
   });

@@ -1,11 +1,8 @@
 part of '../../messages.dart';
 
-@jsonSerializable
 enum PriceType { one_time, recurring }
 
 /// https://stripe.com/docs/api/charges/object
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class Price {
   /// Unique identifier for the object.
   final String id;

@@ -1,7 +1,6 @@
 part of messages;
 
 /// https://stripe.com/docs/api/setup_intents/create
-@jsonSerializable
 class CreateSetupIntentRequest {
   /// Set to true to attempt to confirm this SetupIntent immediately.
   /// This parameter defaults to false. If the payment method attached is a

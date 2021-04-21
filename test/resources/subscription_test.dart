@@ -1,21 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' show Response;
+import 'package:http/testing.dart';
 import 'package:stripe/messages.dart';
 import 'package:stripe/src/client.dart';
 import 'package:stripe/src/resources/subscription.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late Client client;
-  late SubscriptionResource subscriptionResource;
-  setUp(() {
-    // We set the baseUrl to something unreachable, because we define
-    // interceptors in the tests.
-    client = Client(apiKey: 'sk_foobar', baseUrl: 'http://void/');
-    subscriptionResource = SubscriptionResource(client);
-  });
   group('SubscriptionResource', () {
     test('properly decodes all values', () async {
       final request = ListSubscriptionRequest(
@@ -23,18 +15,15 @@ void main() {
         status: SubscriptionStatus.all,
       );
 
-      client.dio.interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          expect(options.data, request.toJson());
-          handler.resolve(
-            Response(
-              requestOptions: options,
-              data: jsonDecode(listSubscriptionsResponse),
-              statusCode: HttpStatus.ok,
-            ),
-          );
-        },
-      ));
+      var client = Client.withClient(
+        MockClient((request) async {
+          expect(request.url, Uri.parse('https://api.stripe.com/v1/subscriptions'));
+          return Response(listSubscriptionsResponse, HttpStatus.ok);
+        }),
+        apiKey: 'sk_foobar',
+      );
+
+      var subscriptionResource = SubscriptionResource(client);
 
       final response = await subscriptionResource.list(request);
 

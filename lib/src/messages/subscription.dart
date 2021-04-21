@@ -1,6 +1,5 @@
 part of '../../messages.dart';
 
-@jsonSerializable
 enum SubscriptionStatus {
   incomplete,
   incomplete_expired,
@@ -15,7 +14,6 @@ enum SubscriptionStatus {
 }
 
 /// https://stripe.com/docs/api/charges/object
-@jsonSerializable
 class Subscription {
   /// Unique identifier for the object.
   final String id;

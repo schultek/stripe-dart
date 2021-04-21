@@ -1,45 +1,37 @@
-import 'package:dio/dio.dart';
 import 'package:stripe/src/client.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('FormDataTransformer', () {
-    late FormDataTransformer transformer;
+  group('form data encoding', () {
+    test('encodes form data correctly', () async {
+      var map = <String, dynamic>{
+        'foo': ['bar1', 'bar2', 1],
+        'bar': {'x': 2, 'y': true}
+      };
 
-    setUp(() {
-      transformer = FormDataTransformer();
-    });
-    test('properly encodes objects without lists', () async {
-      var options = RequestOptions(path: '/', data: {'foo': 'bar'});
-      expect(await transformer.transformRequest(options), '{"foo":"bar"}');
-
-      options = RequestOptions(path: '/', data: {
-        'foo': {'foo2': 'bar'}
+      expect(fixMap(map), {
+        'foo[0]': 'bar1',
+        'foo[1]': 'bar2',
+        'foo[2]': '1',
+        'bar[x]': '2',
+        'bar[y]': 'true',
       });
-      expect(await transformer.transformRequest(options),
-          '{"foo":{"foo2":"bar"}}');
+    });
 
-      options = RequestOptions(path: '/', data: {'foo': 3});
-      expect(await transformer.transformRequest(options), '{"foo":3}');
-    });
-    test('properly changes Lists to Maps', () async {
-      var options = RequestOptions(path: '/', data: <String, dynamic>{
-        'foo': ['bar1', 'bar2']
-      });
-      expect(await transformer.transformRequest(options),
-          '{"foo":{"0":"bar1","1":"bar2"}}');
-    });
     test('goes through map recursively', () async {
-      var options = RequestOptions(path: '/', data: <String, dynamic>{
+      var map = <String, dynamic>{
         'foo': [
           'bar1',
-          <String, dynamic>{
+          {
             'bar2': ['bb1', 'bb2']
           }
         ]
+      };
+      expect(fixMap(map), {
+        'foo[0]': 'bar1',
+        'foo[1][bar2][0]': 'bb1',
+        'foo[1][bar2][1]': 'bb2',
       });
-      expect(await transformer.transformRequest(options),
-          '{"foo":{"0":"bar1","1":{"bar2":{"0":"bb1","1":"bb2"}}}}');
     });
   });
 }

@@ -1,6 +1,5 @@
 part of '../../messages.dart';
 
-@jsonSerializable
 enum PaymentMethodType {
   alipay,
   card,
@@ -18,8 +17,6 @@ enum PaymentMethodType {
 }
 
 /// https://stripe.com/docs/api/checkout/sessions/object
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class Session {
   final String id;
   final String? customer;

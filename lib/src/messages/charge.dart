@@ -1,8 +1,6 @@
 part of '../../messages.dart';
 
 /// https://stripe.com/docs/api/charges/object
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class Charge {
   final String id;
   final String balanceTransaction;
@@ -17,7 +15,6 @@ class Charge {
   });
 }
 
-@jsonSerializable
 class PaymentMethodDetails {
   final PaymentMethodDetailsCard? card;
 
@@ -26,7 +23,6 @@ class PaymentMethodDetails {
   });
 }
 
-@jsonSerializable
 class PaymentMethodDetailsCard {
   final String brand;
   final String last4;

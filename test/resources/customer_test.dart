@@ -1,37 +1,26 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' show Response;
+import 'package:http/testing.dart';
 import 'package:stripe/messages.dart';
 import 'package:stripe/src/client.dart';
 import 'package:stripe/src/resources/customer.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late Client client;
-  late CustomerResource customerResource;
-  setUp(() {
-    // We set the baseUrl to something unreachable, because we define
-    // interceptors in the tests.
-    client = Client(apiKey: 'sk_foobar', baseUrl: 'http://void/');
-    customerResource = CustomerResource(client);
-  });
   group('CustomerResource', () {
     test('properly decodes all values', () async {
-      final request = CreateCustomerRequest();
+      final request = CreateCustomerRequest(email: 'test@example.com', name: 'Tom');
 
-      client.dio.interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) {
-          expect(options.uri, Uri.parse('http://void/customers'));
-          handler.resolve(
-            Response(
-              requestOptions: options,
-              data: jsonDecode(createCustomerResponse),
-              statusCode: HttpStatus.ok,
-            ),
-          );
-        },
-      ));
+      var client = Client.withClient(
+        MockClient((request) async {
+          expect(request.url, Uri.parse('https://api.stripe.com/v1/customers'));
+          return Response(createCustomerResponse, HttpStatus.ok);
+        }),
+        apiKey: 'sk_foobar',
+      );
+
+      var customerResource = CustomerResource(client);
 
       final response = await customerResource.create(request);
 

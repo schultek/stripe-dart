@@ -1,7 +1,5 @@
 part of '../../messages.dart';
 
-@jsonSerializable
-@Json(caseStyle: CaseStyle.Snake)
 class DataList<T> {
   final List<T> data;
   final bool hasMore;
