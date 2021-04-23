@@ -12,7 +12,7 @@ import 'src/resources/session.dart';
 import 'src/resources/setup_intent.dart';
 import 'src/resources/subscription.dart';
 
-export 'messages.dart';
+export 'messages.dart' hide Mapper, MapperException;
 export 'src/webhook.dart';
 
 /// [Stripe] is the Class that provides the Interface for external calls via the
