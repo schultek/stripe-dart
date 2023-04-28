@@ -24,7 +24,7 @@ class CreateCustomerRequest {
   final String? paymentMethod;
 
   /// The customer’s phone number.
-  final String? phoneNumber;
+  final String? phone;
 
   CreateCustomerRequest({
     this.description,
@@ -32,6 +32,6 @@ class CreateCustomerRequest {
     this.metadata,
     this.name,
     this.paymentMethod,
-    this.phoneNumber,
+    this.phone,
   });
 }
