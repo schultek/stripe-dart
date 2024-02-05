@@ -1326,7 +1326,7 @@ class _MapMapper extends BaseMapper<Map> {
   Function get typeFactory => <K, V>(f) => f<Map<K, V>>();
 }
 
-abstract class BaseMapper<T> implements Mapper<T> {
+abstract mixin class BaseMapper<T> implements Mapper<T> {
   @override
   bool equals(T self, Object? other) => self == other;
   @override
